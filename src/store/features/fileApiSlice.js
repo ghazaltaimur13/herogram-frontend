@@ -7,8 +7,7 @@ export const fileApiSlice = apiSlice.injectEndpoints({
       query: (data) => ({
         url: `${API_ROUTES.UPLOAD_FILE}`,
         method: 'POST',
-        body: data,
-        headers: { 'Content-Type': 'multipart/form-data' }
+        body: data
       }),
       transformResponse: (response) => response,
     }),

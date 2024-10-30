@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Container,
@@ -9,7 +9,7 @@ import {
   Card,
   CardMedia,
   CardContent,
-  Grid2 as Grid,
+  Grid,
   Stack,
   Paper,
   Button,
@@ -19,18 +19,14 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import { useUploadFileMutation } from '../../store/features/fileApiSlice';
+import ShowUploadedData from '../../components/ShowUploadedData';
 
 const UploadPage = () => {
   const [files, setFiles] = useState([]);
-  const [
-    uploadData,
-    {
-      isError: errorCode,
-      error: errorResp,
-      isSuccess: isSuccess,
-      isLoading
-    },
-  ] = useUploadFileMutation();
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  const [uploadData, { isError, error, isSuccess, isLoading }] = useUploadFileMutation();
+
   const onDrop = (acceptedFiles) => {
     const updatedFiles = acceptedFiles.map((file) => ({
       file,
@@ -55,15 +51,19 @@ const UploadPage = () => {
     const formData = new FormData();
 
     files.forEach((fileObj, index) => {
-      formData.append(`files`, fileObj.file);
+      formData.append('files', fileObj.file);
       formData.append(`tags[${index}]`, fileObj.tags);
     });
 
     try {
-      const response = await uploadData(formData);
-      const result = await response.json();
-      if (result.message) {
-        console.log(result.message);
+      const response = await uploadData(formData).unwrap(); 
+
+      if (response.data && response.data.uploadedFiles) {
+        console.log('im here')
+        setUploadedFiles(response.data.uploadedFiles);
+      } else {
+        console.log("Unexpected response format:", response.data.uploadedFiles);
+        setUploadedFiles([]); // fallback to empty if unexpected response
       }
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -75,16 +75,21 @@ const UploadPage = () => {
     accept: 'image/*,video/*',
   });
 
+  // Cleanup object URLs on component unmount
+  useEffect(() => {
+    return () => {
+      files.forEach(file => URL.revokeObjectURL(file.preview));
+    };
+  }, [files]);
+
+  console.log(uploadedFiles)
   return (
     <Stack
       direction="row"
       alignItems="center"
       justifyContent="center"
       sx={{
-        minHeight: {
-          xs: 'calc(100vh)',
-          marginTop: '-5rem',
-        },
+        minHeight: { xs: 'calc(100vh)', marginTop: '-5rem' },
       }}
     >
       <Container component="main" maxWidth="xs">
@@ -145,19 +150,24 @@ const UploadPage = () => {
             fullWidth
             sx={{ marginTop: 2 }}
             startIcon={isLoading && <CircularProgress size={16} />}
+            disabled={isLoading || files.length === 0}
           >
-            Upload Files
+            {isLoading ? "Uploading..." : "Upload Files"}
           </Button>
-          { errorResp && errorCode && (
+          {isError && (
             <Alert icon={<CheckIcon fontSize="inherit" />} severity="error">
-              {errorResp}
-            </Alert> )
-          }
-          { isSuccess && (
+              {error?.data?.message || "Failed to upload files."}
+            </Alert>
+          )}
+          {isSuccess && (
             <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
               Uploaded Successfully
-            </Alert> )
-          }
+            </Alert>
+          )}
+          {uploadedFiles.length > 0 && (
+            <ShowUploadedData uploadedFiles={uploadedFiles} />
+          )}
+
         </Paper>
       </Container>
     </Stack>
