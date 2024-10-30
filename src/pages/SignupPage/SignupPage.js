@@ -10,7 +10,7 @@ import {
   Alert,
   Stack
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { useSignupMutation } from '../../store/features/authApiSlice'; // Update this according to your API slice
 import { useAppDispatch } from '../../store/hooks';
 import { setAccessToken } from '../../store/features/baseSlice';
@@ -101,8 +101,8 @@ export default function SignupPage() {
           </Button>
         </Box>
         {errorResp && isError && (
-          <Alert icon={<CheckIcon fontSize="inherit" />} severity="error">
-            {errorResp}
+          <Alert icon={<CloseIcon fontSize="inherit" />} severity="error">
+            {errorResp.data.error || 'Something went Wrong'}
           </Alert>
         )}
       </Paper>

@@ -9,7 +9,7 @@ import {
   Stack,
   Alert,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { Link } from 'react-router-dom'; // Import Link
 import { useLoginMutation } from '../../store/features/authApiSlice';
 import { setAccessToken } from '../../store/features/baseSlice';
@@ -100,9 +100,9 @@ export default function LoginPage() {
             </Typography>
           </Box>
           {errorResp && errorCode && (
-            <Alert icon={<CheckIcon fontSize="inherit" />} severity="error">
-              {errorResp}
-            </Alert>
+            <Alert icon={<CloseIcon fontSize="inherit" />} severity="error">
+            {errorResp.data.error || 'Something went Wrong'}
+          </Alert>
           )}
         </Paper>
       </Container>

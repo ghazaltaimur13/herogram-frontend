@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+
 import { useUploadFileMutation, useGetFilesQuery } from '../../store/features/fileApiSlice';
 import ShowUploadedData from '../../components/ShowUploadedData';
 
@@ -162,7 +164,7 @@ const UploadPage = () => {
             {isLoading ? "Uploading..." : "Upload Files"}
           </Button>
           {isError && (
-            <Alert icon={<CheckIcon fontSize="inherit" />} severity="error">
+            <Alert icon={<CloseIcon fontSize="inherit" />} severity="error">
               {uploadError?.data?.message || "Failed to upload files."}
             </Alert>
           )}
