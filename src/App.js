@@ -1,10 +1,15 @@
+import React from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import ROUTES from './constants/RoutesConstants';
 import './App.css';
 import { AuthGuard, UnAuthGuard } from '../src/router/RouteGuard';
-import LoginPage from './pages/LoginPage/LoginPage';
-import UploadPage from './pages/UploadData/UploadPage';
+import withLoading from './components/hocs/withLoading.hoc';
 
+const LoginPage = React.lazy(() => import('./pages/LoginPage/LoginPage'));
+const Login = withLoading(LoginPage);
+
+const UploadPage = React.lazy(() => import('./pages/UploadData/UploadPage'));
+const Upload = withLoading(UploadPage);
 
 function App() {
   return (
@@ -12,12 +17,12 @@ function App() {
       <Routes>
         {/* protected routes */}
         <Route element={<AuthGuard />}>
-          <Route index path={ROUTES.DASHBOARD} element={<UploadPage />} />
+          <Route index path={ROUTES.DASHBOARD} element={<Upload />} />
         </Route>
 
         {/* public routes access if not authorized */}
         <Route element={<UnAuthGuard />}>
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Route path={ROUTES.LOGIN} element={<Login />} />
         </Route>
 
         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />

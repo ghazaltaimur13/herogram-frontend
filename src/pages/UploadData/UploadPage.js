@@ -96,7 +96,7 @@ const UploadPage = () => {
       alignItems="center"
       justifyContent="center"
       sx={{
-        minHeight: { xs: 'calc(100vh)', paddingTop: '5rem' },
+        minHeight: { xs: 'calc(100vh)', paddingTop: '1rem' },
       }}
     >
       <Container component="main" maxWidth="xs">
