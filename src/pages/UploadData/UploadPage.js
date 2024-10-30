@@ -58,9 +58,8 @@ const UploadPage = () => {
     try {
       const response = await uploadData(formData).unwrap(); 
 
-      if (response.data && response.data.uploadedFiles) {
-        console.log('im here')
-        setUploadedFiles(response.data.uploadedFiles);
+      if (response.message && Array.isArray(response.uploadedFiles)) {
+        setUploadedFiles(response.uploadedFiles); // Only if it's in expected format
       } else {
         console.log("Unexpected response format:", response.data.uploadedFiles);
         setUploadedFiles([]); // fallback to empty if unexpected response
@@ -82,7 +81,6 @@ const UploadPage = () => {
     };
   }, [files]);
 
-  console.log(uploadedFiles)
   return (
     <Stack
       direction="row"
@@ -164,11 +162,12 @@ const UploadPage = () => {
               Uploaded Successfully
             </Alert>
           )}
-          {uploadedFiles.length > 0 && (
-            <ShowUploadedData uploadedFiles={uploadedFiles} />
-          )}
+          
 
         </Paper>
+        {uploadedFiles.length > 0 && (
+            <ShowUploadedData uploadedFiles={uploadedFiles} />
+          )}
       </Container>
     </Stack>
   );
