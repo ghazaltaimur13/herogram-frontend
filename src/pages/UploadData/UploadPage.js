@@ -18,14 +18,26 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
-import { useUploadFileMutation } from '../../store/features/fileApiSlice';
+import { useUploadFileMutation, useGetFilesQuery } from '../../store/features/fileApiSlice';
 import ShowUploadedData from '../../components/ShowUploadedData';
 
 const UploadPage = () => {
   const [files, setFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [refreshFiles, setRefreshFiles] = useState(false); // New state to control refetching
 
-  const [uploadData, { isError, error, isSuccess, isLoading }] = useUploadFileMutation();
+  const { data: filesData, error, isLoading: isFetchingFiles, isError: isFetchError, refetch } = useGetFilesQuery();
+  const [uploadData, { isError, error: uploadError, isSuccess, isLoading }] = useUploadFileMutation();
+
+  // Fetch uploaded files on component mount or when refreshFiles changes
+  useEffect(() => {
+    if (filesData) {
+      setUploadedFiles(filesData);
+    }
+  }, [filesData]);
+  useEffect(() => {
+    refetch();
+  }, [refreshFiles, refetch]); // Refetch when refreshFiles changes
 
   const onDrop = (acceptedFiles) => {
     const updatedFiles = acceptedFiles.map((file) => ({
@@ -56,38 +68,35 @@ const UploadPage = () => {
     });
 
     try {
-      const response = await uploadData(formData).unwrap(); 
+      const response = await uploadData(formData).unwrap();
 
-      if (response.message && Array.isArray(response.uploadedFiles)) {
-        setUploadedFiles(response.uploadedFiles); // Only if it's in expected format
-      } else {
-        console.log("Unexpected response format:", response.data.uploadedFiles);
-        setUploadedFiles([]); // fallback to empty if unexpected response
-      }
+      if (response.message) {
+        refetch();
+        setFiles([])
+      } 
     } catch (error) {
       console.error("Error uploading files:", error);
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    accept: 'image/*,video/*',
-  });
-
-  // Cleanup object URLs on component unmount
   useEffect(() => {
     return () => {
       files.forEach(file => URL.revokeObjectURL(file.preview));
     };
   }, [files]);
 
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: 'image/*,video/*',
+  });
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       alignItems="center"
       justifyContent="center"
       sx={{
-        minHeight: { xs: 'calc(100vh)', marginTop: '-5rem' },
+        minHeight: { xs: 'calc(100vh)', paddingTop: '5rem' },
       }}
     >
       <Container component="main" maxWidth="xs">
@@ -154,7 +163,7 @@ const UploadPage = () => {
           </Button>
           {isError && (
             <Alert icon={<CheckIcon fontSize="inherit" />} severity="error">
-              {error?.data?.message || "Failed to upload files."}
+              {uploadError?.data?.message || "Failed to upload files."}
             </Alert>
           )}
           {isSuccess && (
@@ -162,13 +171,19 @@ const UploadPage = () => {
               Uploaded Successfully
             </Alert>
           )}
-          
-
         </Paper>
-        {uploadedFiles.length > 0 && (
-            <ShowUploadedData uploadedFiles={uploadedFiles} />
-          )}
       </Container>
+      {isFetchingFiles ? (
+        <CircularProgress />
+      ) : (
+        <ShowUploadedData
+          uploadedFiles={uploadedFiles}
+          isLoading={isFetchingFiles}
+          fetchError={error}
+          isFetchError={isFetchError}
+          setRefreshFiles={setRefreshFiles} // Pass the setter to ShowUploadedData
+        />
+      )}
     </Stack>
   );
 };

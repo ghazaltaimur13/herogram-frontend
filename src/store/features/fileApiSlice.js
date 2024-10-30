@@ -11,7 +11,17 @@ export const fileApiSlice = apiSlice.injectEndpoints({
       }),
       transformResponse: (response) => response,
     }),
+    getFiles: builder.query({
+        query: () => `${API_ROUTES.READ_FILE}`
+    }),
+    trackFile: builder.mutation({
+        query: (fileId) => ({
+          url:`${API_ROUTES.TRACK_FILE}`,
+          method: 'POST',
+          body: { fileId },
+        }),
+      }),
   }),
 });
 
-export const { useUploadFileMutation } = fileApiSlice;
+export const { useUploadFileMutation, useGetFilesQuery, useTrackFileMutation } = fileApiSlice;
