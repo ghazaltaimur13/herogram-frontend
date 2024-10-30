@@ -4,5 +4,6 @@ export const API_ROUTES = {
     UPLOAD_FILE: '/uploadFile',
     READ_FILE: '/readFiles',
     TRACK_FILE: '/trackFiles',
+    SIGNUP: '/signup',
   };
   

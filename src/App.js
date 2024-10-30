@@ -11,6 +11,9 @@ const Login = withLoading(LoginPage);
 const UploadPage = React.lazy(() => import('./pages/UploadData/UploadPage'));
 const Upload = withLoading(UploadPage);
 
+const SignupPage = React.lazy(() => import('./pages/SignupPage/SignupPage'));
+const Signup = withLoading(SignupPage);
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +26,7 @@ function App() {
         {/* public routes access if not authorized */}
         <Route element={<UnAuthGuard />}>
           <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.SIGNUP} element={<Signup />} />
         </Route>
 
         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
